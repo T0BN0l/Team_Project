@@ -46,17 +46,18 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-# class UserViews(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     view_page = models.ForeignKey(Page, on_delete=models.CASCADE)
-#
-#     def __str__(self):
-#         return self.user.username + ' viewed ' + self.view_page.title
-#
-#
-# class UserLike(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     like_category = models.ForeignKey(Category, on_delete=models.CASCADE)
-#
-#     def __str__(self):
-#         return self.user.username + ' viewed ' + self.like_category.name
+class UserViews(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=128,default='')
+    url = models.URLField(default='')
+
+    def __str__(self):
+        return self.user.username + ' recently viewed on ' + self.title
+
+
+class UserLikes(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    liked_title = models.CharField(max_length=128, unique=True)
+
+    def __str__(self):
+        return self.user.username + ' recently liked ' + self.liked_title
