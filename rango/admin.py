@@ -1,5 +1,5 @@
 from django.contrib import admin
-from rango.models import Category, Page, UserProfile, UserViews, UserLikes
+from rango.models import Category, Page, UserProfile, UserView, UserLike
 
 
 class PageAdmin(admin.ModelAdmin):
@@ -10,20 +10,16 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-class UserViewsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'view_page')
-
-
 class UserLikesAdmin(admin.ModelAdmin):
-    list_display = ('user', 'liked_title')
+    prepopulated_fields = {'check': ('category', )}
 
 
 class UserViewsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'title', 'url')
+    prepopulated_fields = {'check': ('page', )}
 
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Page, PageAdmin)
 admin.site.register(UserProfile)
-admin.site.register(UserViews, UserViewsAdmin)
-admin.site.register(UserLikes, UserLikesAdmin)
+admin.site.register(UserView, UserViewsAdmin)
+admin.site.register(UserLike, UserLikesAdmin)

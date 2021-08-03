@@ -46,18 +46,27 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-class UserViews(models.Model):
+class UserView(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=128,default='')
-    url = models.URLField(default='')
+    # title = models.CharField(max_length=128, default='')
+    # url = models.URLField()
+    page = models.ForeignKey(Page, on_delete=models.CASCADE,default=None)
+    check = models.CharField(max_length=128, unique=True)
+
+    class Meta:
+        verbose_name_plural = 'user views'
 
     def __str__(self):
-        return self.user.username + ' recently viewed on ' + self.title
+        return self.user.username
 
 
-class UserLikes(models.Model):
+class UserLike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    liked_title = models.CharField(max_length=128, unique=True)
+    # name = models.CharField(max_length=128, unique=True)
+    # slug = models.SlugField(unique=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,default=None)
+    check = models.CharField(max_length=128, unique=True)
 
     def __str__(self):
-        return self.user.username + ' recently liked ' + self.liked_title
+        return self.user.username
+

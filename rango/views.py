@@ -1,43 +1,25 @@
 from datetime import datetime
-
-from django import forms
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
-from rango.admin import CategoryAdmin
-from django.http.response import HttpResponseForbidden
 from django.shortcuts import render
 from rango.models import Category
 from rango.models import Page
-from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
+from rango.models import User, UserLike, UserView
+from rango.forms import CategoryForm, PageForm
 from django.shortcuts import redirect
 from django.urls import reverse
-
-from django.http import HttpResponse
 
 
 def index(request):
     # cookie test
     request.session.set_test_cookie()
-    # Construct a dictionary to pass to the template engine as its context.
-    # Note the key boldmessage matches to {{ boldmessage }} in the template!
-    # context_dict={'boldmessage':'Crunchy, creamy, cookie, candy, cupcake!'}
-    # Return a rendered response to send to the client.
-    # We make use of the shortcut function to make our lives easier.
-    # Note that the first parameter is the template we wish to use.
     category_list = Category.objects.order_by('-likes')[:5]
     page_list = Page.objects.order_by('-views')[:5]
     context_dict = {}
-    # context_dict={'boldmessage': 'Crunchy, creamy, cookie, candy, cupcake!', 'categories': Category_list}
-    # context_dict={'categories': Category_list}
+
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
     context_dict['categories'] = category_list
     context_dict['pages'] = page_list
-    # ??? it should not use here cuz it only count the view times of about.html???
     visitor_cookie_handler(request)
-    # context_dict['visits'] = int(request.session['visits'])
-    # context_dict['visits'] = request.COOKIES.get('visits', '1')
-
     return render(request, 'rango/index.html', context=context_dict)
 
 
@@ -46,7 +28,6 @@ def about(request):
     if request.session.test_cookie_worked():
         print("TEST COOKIE WORKED!")
         request.session.delete_test_cookie()
-    # context_dict={'aboutmessage':'This is about message: goodluck and have a nice day!'}
     print(request.method)
     print(request.user)
     visitor_cookie_handler(request)
@@ -119,6 +100,32 @@ def add_page(request, category_name_slug):
 @login_required
 def restricted(request):
     return render(request, 'rango/restricted.html')
+
+
+@login_required
+def show_user_likes(request, username):
+    context_dict = {}
+    try:
+        user_likes = UserLike.objects.filter(username=username)
+
+        context_dict['likes'] = user_likes
+
+    except Category.DoesNotExist:
+        context_dict['likes'] = None
+    return render(request, 'rango/user_likes.html', context=context_dict)
+
+
+@login_required
+def show_user_views(request, username):
+    context_dict = {}
+    try:
+        user_views = UserView.objects.filter(username=username)
+
+        context_dict['views'] = user_views
+
+    except Category.DoesNotExist:
+        context_dict['views'] = None
+    return render(request, 'rango/user_views.html', context=context_dict)
 
 
 def visitor_cookie_handler(request):
