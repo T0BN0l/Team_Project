@@ -10,16 +10,18 @@ class CategoryForm(forms.ModelForm):
     views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
     likes = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
     slug = forms.CharField(widget=forms.HiddenInput(), required=False)
+    thumbnail = forms.ImageField(required=False)
 
     class Meta:
         model = Category
-        fields = ('name',)
+        fields = ('name', 'thumbnail', )
 
 
 class PageForm(forms.ModelForm):
     title = forms.CharField(max_length=Page.MAX_TITLE_LENGTH, help_text="Please enter the title of the page.")
     url = forms.URLField(max_length=Page.MAX_URL_LENGTH, help_text="Please enter the URL of the page.")
     views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
+    thumbnail = forms.ImageField(required=False)
 
     class Meta:
         model = Page
