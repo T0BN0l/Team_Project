@@ -234,7 +234,7 @@ class ProfileView(View):
         form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
         if form.is_valid():
             form.save(commit=True)
-            return redirect('rango:profile', user.useername)
+            return redirect('rango:profile', user.username)
         else:
             print(form.errors)
         context_dict = {'user_profile': user_profile,
