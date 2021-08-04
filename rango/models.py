@@ -5,9 +5,11 @@ from django.template.defaultfilters import slugify
 
 class Category(models.Model):
     MAX_NAME_LENGTH = 128
+    MAX_DES_LENGTH = 512
     name = models.CharField(max_length=MAX_NAME_LENGTH, unique=True)
     views = models.IntegerField(default=0)
     likes = models.IntegerField(default=0)
+    description = models.CharField(max_length=MAX_DES_LENGTH)
     slug = models.SlugField(unique=True)
     thumbnail = models.ImageField(upload_to='category_images', blank=True)
 
@@ -25,10 +27,12 @@ class Category(models.Model):
 class Page(models.Model):
     MAX_TITLE_LENGTH = 128
     MAX_URL_LENGTH = 200
+    MAX_DES_LENGTH = 512
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     title = models.CharField(max_length=MAX_TITLE_LENGTH)
     url = models.URLField()
     views = models.IntegerField(default=0)
+    description = models.CharField(max_length=MAX_DES_LENGTH)
     thumbnail = models.ImageField(upload_to='page_images', blank=True)
 
     def __str__(self):
