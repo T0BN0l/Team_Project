@@ -46,12 +46,21 @@ def show_category(request, category_name_slug):
 
         pages = Page.objects.filter(category=category)
 
+        # Check whether user already liked this category or not
+        category_liked = False
+        if request.user.is_authenticated:
+            user_id = request.user.id
+            category_id = category.id
+            category_liked = UserLike.objects.filter(user_id=user_id, category_id=category_id).exists()
+
         context_dict['pages'] = pages
         context_dict['category'] = category
+        context_dict['category_liked'] = category_liked
 
     except Category.DoesNotExist:
         context_dict['pages'] = None
         context_dict['category'] = None
+        context_dict['category_liked'] = False
 
     return render(request, 'rango/category.html', context_dict)
 
@@ -97,11 +106,6 @@ def add_page(request, category_name_slug):
 
     context_dict = {'form': form, 'category': category}
     return render(request, 'rango/add_page.html', context=context_dict)
-
-
-@login_required
-def restricted(request):
-    return render(request, 'rango/restricted.html')
 
 
 @login_required
@@ -159,9 +163,13 @@ class LikeCategoryView(View):
     @method_decorator(login_required)
     def get(self, request):
         category_id = request.GET['category_id']
+        user_id = request.user.id
 
         try:
             category = Category.objects.get(id=int(category_id))
+            check = str(user_id) + '_' + str(category_id)
+            ulike = UserLike.objects.get_or_create(user_id=user_id, category_id=category_id, check=check)[0]
+            ulike.save()
         except Category.DoesNotExist:
             return HttpResponse(-1)
         except ValueError:
@@ -171,3 +179,15 @@ class LikeCategoryView(View):
         category.save()
 
         return HttpResponse(category.likes)
+
+@login_required
+def profile(request):
+    user_id = request.user.id
+    # get most recent 5 like categories (since the id is auto increment, the biggest one is added most recently)
+    ulikes = UserLike.objects.filter(user_id=user_id).order_by('-id')[:5]
+
+    category_list = [x.category for x in ulikes]
+    context_dict = {}
+
+    context_dict['categories'] = category_list
+    return render(request, 'rango/profile.html', context=context_dict)
