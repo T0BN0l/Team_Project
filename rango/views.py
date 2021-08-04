@@ -7,7 +7,9 @@ from rango.models import User, UserLike, UserView
 from rango.forms import CategoryForm, PageForm
 from django.shortcuts import redirect
 from django.urls import reverse
-
+from django.http import HttpResponse
+from django.views import View
+from django.utils.decorators import method_decorator
 
 def index(request):
     # cookie test
@@ -152,3 +154,20 @@ def get_server_side_cookie(request, cookie, default_val=None):
         val = default_val
     return val
 
+# like category view
+class LikeCategoryView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        category_id = request.GET['category_id']
+
+        try:
+            category = Category.objects.get(id=int(category_id))
+        except Category.DoesNotExist:
+            return HttpResponse(-1)
+        except ValueError:
+            return HttpResponse(-1)
+
+        category.likes = category.likes + 1
+        category.save()
+
+        return HttpResponse(category.likes)
