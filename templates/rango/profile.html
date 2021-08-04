@@ -33,4 +33,23 @@
             </div>
         </div>
     </div>
+    <div class="container">
+<div class="row">
+<div class="ul-box">
+<h2>My Favourite Categories</h2>
+
+    {% if categories %}
+       {% for category in categories %}
+                    <div class="li-box">
+                        <a href="{% url 'rango:show_category' category.slug %}"><img src="{{ category.thumbnail.url }}"></a>
+                    <span>{{ category.name }}</span>
+                    </div>
+                {% endfor %}
+    {% else %}
+        <strong>There are no categories present.</strong>
+    {% endif %}
+</div>
+    </div>
+    </div>
+
 {% endblock %}
