@@ -47,11 +47,10 @@ def show_category(request, category_name_slug):
         pages = Page.objects.filter(category=category)
 
         # Check whether user already liked this category or not
-        category_liked = False
         if request.user.is_authenticated:
-            user_id = request.user.id
-            category_id = category.id
-            category_liked = UserLike.objects.filter(user_id=user_id, category_id=category_id).exists()
+            category_liked = is_user_liked_category(request.user.id, category.id)
+        else:
+            category_liked = False
 
         context_dict['pages'] = pages
         context_dict['category'] = category
@@ -109,19 +108,6 @@ def add_page(request, category_name_slug):
 
 
 @login_required
-def show_user_likes(request, username):
-    context_dict = {}
-    try:
-        user_likes = UserLike.objects.filter(username=username)
-
-        context_dict['likes'] = user_likes
-
-    except Category.DoesNotExist:
-        context_dict['likes'] = None
-    return render(request, 'rango/user_likes.html', context=context_dict)
-
-
-@login_required
 def show_user_views(request, username):
     context_dict = {}
     try:
@@ -164,9 +150,11 @@ class LikeCategoryView(View):
     def get(self, request):
         category_id = request.GET['category_id']
         user_id = request.user.id
+        category_liked = is_user_liked_category(user_id, category_id)
 
         try:
             category = Category.objects.get(id=int(category_id))
+
             check = str(user_id) + '_' + str(category_id)
             ulike = UserLike.objects.get_or_create(user_id=user_id, category_id=category_id, check=check)[0]
             ulike.save()
@@ -175,8 +163,10 @@ class LikeCategoryView(View):
         except ValueError:
             return HttpResponse(-1)
 
-        category.likes = category.likes + 1
-        category.save()
+        # Only increment the like in category table if the category is firstly liked by the login user
+        if not category_liked:
+            category.likes = category.likes + 1
+            category.save()
 
         return HttpResponse(category.likes)
 
@@ -191,3 +181,7 @@ def profile(request):
 
     context_dict['categories'] = category_list
     return render(request, 'rango/profile.html', context=context_dict)
+
+# Check whether the user liked the category or not
+def is_user_liked_category(user_id, category_id):
+    return UserLike.objects.filter(user_id=user_id, category_id=category_id).exists()
