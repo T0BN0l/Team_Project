@@ -59,10 +59,10 @@ def add_category(request):
     form = CategoryForm()
 
     if request.method == 'POST':
-        form = CategoryForm(request.POST)
-
+        form = CategoryForm(request.POST, request.FILES)
         if form.is_valid():
             form.save(commit=True)
+            form.thumbnail = form.cleaned_data['thumbnail']
             return redirect(reverse('rango:index'))
         else:
             print(form.errors)
@@ -81,11 +81,12 @@ def add_page(request, category_name_slug):
     form = PageForm()
 
     if request.method == 'POST':
-        form = PageForm(request.POST)
+        form = PageForm(request.POST, request.FILES)
         if form.is_valid():
             if category:
                 page = form.save(commit=False)
                 page.category = category
+                page.thumbnail = form.cleaned_data['thumbnail']
                 page.view = 0
                 page.save()
                 return redirect(reverse('rango:show_category', kwargs={'category_name_slug': category_name_slug}))
