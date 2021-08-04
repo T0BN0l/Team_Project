@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+
+
 {% load rango_template_tags %}
 <html lang="en">
     <head>
@@ -18,6 +20,67 @@
 
     <!-- Custom styles for this template -->
     <link href="https://getbootstrap.com/docs/4.2/examples/dashboard/dashboard.css" rel="stylesheet">
+{#    ========================================================================#}
+
+
+      <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+      <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+      <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+      <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <style>
+  /* Make the image fully responsive */
+  .carousel-inner img {
+      width: 100%;
+      height: 100%;
+  }
+
+  </style>
+<style>
+    .ul-box{
+    /*white-space: nowrap;*/
+    width: 900px;
+        border: slategrey;
+}
+/* 包裹图片下标题格子 */
+.li-box span{
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+/* 包裹图片是固定的宽度 */
+.li-box{
+    width: 150px;
+    margin-left: 30px;
+}
+/* 最外层: x-axis 滚动条出现以及 y-axis 滚动条隐藏 */
+.jz-box{
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+/* 包裹图片的最外层div与下标题div同样宽度 */
+.jz-box,.title-box{
+    width: 150px;
+}
+/* 滚动图片的下标题以及图片的下标题 */
+.title-box,.li-box span{
+    text-align: center;
+}
+/* 顶格最大宽度: 最外层和滚动图片的下标题以及图片的下标题; */
+.li-box span{
+    width: 100%;
+}
+/* 浮动: li和里面的img以及图片的标题 */
+.li-box,.li-box img,.li-box span{
+    /*border: 1px solid red;*/
+    float: left;
+}
+</style>
+
+
+
+
+
+
     </head>
 
     <body>
@@ -32,6 +95,7 @@
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item"><a class="nav-link" href="{% url 'rango:index' %}">Home</a></li>
                         <li class="nav-item "><a class="nav-link" href="{% url 'rango:about' %}">About</a></li>
+                    <li class="nav-item "><a class="nav-link" href="{% url 'rango:search' %}">Search</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item "><a class="nav-link" href="{% url 'rango:restricted' %}">Restricted</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'auth_logout' %}?next=/rango/">Logout</a></li>
@@ -70,8 +134,10 @@
 
         <!-- Bootstrap core JavaScript -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script>window.jQuery || document.write('<script src="https://getbootstrap.com/docs/4.2/assets/js/vendor/jquery-slim.min.js"><\/script>')</script><script src="https://getbootstrap.com/docs/4.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-zDnhMsjVZfS3hiP7oCBRmfjkQC4fzxVxFhBx8Hkz2aZX8gEvA/jsP3eXRCvzTofP" crossorigin="anonymous"></script>
+        <script src="{% static "js/jquery-3.3.1.min.js" %}" crossorigin="anonymous"></script>
+        <script src="{% static "js/rango-jquery.js" %}" crossorigin="anonymous"></script>
+        <script>window.jQuery || document.write('<script src="https://getbootstrap.com/docs/4.2/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+        <script src="https://getbootstrap.com/docs/4.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-zDnhMsjVZfS3hiP7oCBRmfjkQC4fzxVxFhBx8Hkz2aZX8gEvA/jsP3eXRCvzTofP" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
 
 

@@ -17,16 +17,20 @@
         </div>
         </div>
         {% if pages %}
-            <ul>
+            <br>
                 {% for page in pages %}
-                    <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+
+                    <li><a href="{{ page.url }}"><img src="{{ page.thumbnail.url }}"></a></li>
+                    <span>{{ page.title }}</span></br>
+                    <span>{{ page.description }}</span></br></br></br>
                 {% endfor %}
             </ul>
         {% else %}
             <strong>No pages currently in category.</strong>
         {% endif %}
         {% if user.is_authenticated %}
-            <a href="{% url 'rango:add_page' category.slug %}">Add Page</a> <br />
+{#            <a href="{% url 'rango:add_page' category.slug %}">Add Page</a> <br />#}
+            <a href="{% url 'rango:add_page' category.slug %}"><button class="btn btn-primary" type="submit" name="add_page">Add Page</button></a></br>
         {% endif %}
     {% else %}
     The specified category does not exist.
