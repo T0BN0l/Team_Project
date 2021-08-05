@@ -42,6 +42,7 @@ class Page(models.Model):
     def save(self, *args, **kwargs):
         if self.views < 0:
             self.views = 0
+        super(Page, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title
