@@ -17,6 +17,10 @@ class Category(models.Model):
     thumbnail = models.ImageField(upload_to='category_images', blank=True)
 
     def save(self, *args, **kwargs):
+        if self.views < 0:
+            self.views = 0
+        if self.likes < 0:
+            self.likes = 0
         self.slug = slugify(self.name)
         super(Category, self).save(*args, **kwargs)
 
@@ -40,6 +44,11 @@ class Page(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.views < 0:
+            self.views = 0
+        super(Page, self).save(*args, **kwargs)
 
 
 class UserProfile(models.Model):

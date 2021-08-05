@@ -1,19 +1,37 @@
 {% extends 'rango/base.html' %}
-{%load staticfiles %}
+{% load static %}
 
 {% block title_block %}
-    Restricted Page
+    Profile
 {% endblock %}
 
 {% block body_block %}
     <div class="jumbotron p-4">
-    <div class="container">
-        <h1 class="jumbotron-heading">Restricted Page</h1>
+        <div class="container">
+            <h1 class="jumbotron-heading">User Profile</h1>
+        </div>
     </div>
-    </div>
-    Since you're logged in, you can see this text!<br />
-    {% if user.is_authenticated %}
-        Welcome, {{ user.username }}!
-    {% endif %}
 
+     <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-6">
+                    <div class="card-body">
+                        <h2>Most Recent 5 User Likes</h2>
+                        <p class="card-text">
+                        {% if categories %}
+                            <ul class="list-group">
+                            {% for category in categories %}
+                                <li class="list-group-item"><a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a></li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <strong>There is no like yet.</strong>
+                        {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
