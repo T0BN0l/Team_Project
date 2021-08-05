@@ -18,11 +18,13 @@
                         <div>
                 <strong id="like_count">{{ category.likes }}</strong> likes
                 {% if user.is_authenticated %}
+                    {% if not category_liked %}
                 <button id="like_btn" data-categoryid="{{ category.id }}"
                     class="btn btn-primary btn-sm" type="button">
                     <span data-feather="thumbs-up"></span>
                     Like Category
                 </button>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
