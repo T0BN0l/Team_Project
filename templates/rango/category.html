@@ -1,5 +1,5 @@
 {% extends 'rango/base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block title_block %}
     {% if category %}
@@ -14,9 +14,10 @@
         <div class="jumbotron p-4">
         <div class="container">
             <h1 class="jumbotron-heading">{{ category.name }}</h1>
-            <div>
+        <!--==========================================================================-->
+                        <div>
                 <strong id="like_count">{{ category.likes }}</strong> likes
-                {% if user.is_authenticated and not category_liked %}
+                {% if user.is_authenticated %}
                 <button id="like_btn" data-categoryid="{{ category.id }}"
                     class="btn btn-primary btn-sm" type="button">
                     <span data-feather="thumbs-up"></span>
@@ -25,18 +26,24 @@
                 {% endif %}
             </div>
         </div>
+        <!--==========================================================================-->
+
         </div>
         {% if pages %}
-            <ul>
+            <br>
                 {% for page in pages %}
-                    <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+
+                    <li><a href="{{ page.url }}"><img src="{{ page.thumbnail.url }}"></a></li>
+                    <span>{{ page.title }}</span></br>
+                    <span>{{ page.description }}</span></br></br></br>
                 {% endfor %}
             </ul>
         {% else %}
             <strong>No pages currently in category.</strong>
         {% endif %}
         {% if user.is_authenticated %}
-            <a href="{% url 'rango:add_page' category.slug %}">Add Page</a> <br />
+{#            <a href="{% url 'rango:add_page' category.slug %}">Add Page</a> <br />#}
+            <a href="{% url 'rango:add_page' category.slug %}"><button class="btn btn-primary" type="submit" name="add_page">Add Page</button></a></br>
         {% endif %}
     {% else %}
     The specified category does not exist.

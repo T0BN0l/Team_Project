@@ -1,5 +1,5 @@
 {% extends 'rango/base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block title_block %}
     Add a Page
@@ -13,7 +13,7 @@
     </div>
     <div class="container">
     <div class="row">
-        <form role="form" id="page_form" method="post" action="{% url 'rango:add_page' category.slug %}">
+        <form role="form" enctype="multipart/form-data" id="page_form" method="post" action="{% url 'rango:add_page' category.slug %}">
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
                 {{ hidden }}

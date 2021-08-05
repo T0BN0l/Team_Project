@@ -1,39 +1,55 @@
 {% extends 'rango/base.html' %}
-{%load staticfiles %}
+{%load static %}
 
 {% block title_block %}
-Profile
+    Profile for {{ selected_user.username }}
 {% endblock %}
 
 {% block body_block %}
     <div class="jumbotron p-4">
         <div class="container">
-            <h1 class="jumbotron-heading">User Profile</h1>
+            <h1 class="jumbotron-heading">{{ selected_user.username }}'s Profile</h1>
         </div>
     </div>
 
      <div class="container">
         <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-6">
-                    <div class="card-body">
-                        <h2>Most Recent 5 User Likes</h2>
-                        <p class="card-text">
-                        {% if categories %}
-                            <ul class="list-group">
-                            {% for category in categories %}
-                                <li class="list-group-item"><a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a></li>
-                            {% endfor %}
-                            </ul>
-                        {% else %}
-                            <strong>There is no like yet.</strong>
-                        {% endif %}
-                        </p>
-                    </div>
-                </div>
+            <img src="{{ MEDIA_URL }}{{ user_profile.picture }}" width="300" height="300" alt="{{ selected_user.username }}'s profile image" />
+            <br />
+            <div>
+                {% if selected_user == user %}
+                <form method="post" action="." enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <input type="submit" value="Update" />
+                </form>
+                {% else %}
+                <p>
+                    <strong>Website:</strong>
+                    <a href="{{ user_profile.website }}">{{ user_profile.website }}</a>
+                </p>
+                {% endif %}
             </div>
         </div>
     </div>
+    <div class="container">
+<div class="row">
+<div class="ul-box">
+<h2>My Favourite Categories</h2>
+
+    {% if categories %}
+       {% for category in categories %}
+                    <div class="li-box">
+                        <a href="{% url 'rango:show_category' category.slug %}"><img src="{{ category.thumbnail.url }}"></a>
+                    <span>{{ category.name }}</span>
+                    </div>
+                {% endfor %}
+    {% else %}
+        <strong>There are no categories present.</strong>
+    {% endif %}
+</div>
+    </div>
+    </div>
+
 {% endblock %}
-
-

@@ -1,27 +1,104 @@
 {% extends 'rango/base.html' %}
-{% load staticfiles %}
+{% load static %}
 
-{% block title_block %}
-    Homepage
+
+
+{% block head_block %}
+    {% block title_block %}
+        HomePage
+    {% endblock %}
+    <style>
+
+
+    </style>
 {% endblock %}
 
 {% block body_block %}
-    <h1>Rango says...</h1>
-    <div class="jumbotron p-4">
+{#    <h1>Rango says...</h1>#}
+{#    <div class="jumbotron p-4">#}
+{#    <div class="container">#}
+{#        <h1 class="jumbotron-heading">Rango says...</h1>#}
+{#        <div>#}
+{#            <h2 class="h2">#}
+{#            {% if user.is_authenticated %}#}
+{#                howdy {{ user.username }}!#}
+{#            {% else %}#}
+{#                hey there partner!#}
+{#            {% endif %}#}
+{#            </h2>#}
+{#            <strong>{{ boldmessage }}</strong>#}
+{#        </div>#}
+{#    </div>#}
+{#    </div>#}
+
+
+    <div id="demo" class="carousel slide" data-ride="carousel">
+
+  <!-- 指示符 -->
+  <ul class="carousel-indicators">
+    <li data-target="#demo" data-slide-to="0" class="active"></li>
+    <li data-target="#demo" data-slide-to="1"></li>
+    <li data-target="#demo" data-slide-to="2"></li>
+  </ul>
+
+  <!-- 轮播图片 -->
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+        <a href="{% url 'rango:show_category' 'action' %}"><img src="{% static 'images/action.jpg' %}"></a>
+      <div class="carousel-caption">
+        <h3>Action Movie</h3>
+        <p>Life is like binary. It's either one or zero</p>
+      </div>
+    </div>
+    <div class="carousel-item">
+        <a href="{% url 'rango:show_category' 'anime' %}"><img src="{% static 'images/anime.jpg' %}"></a>
+      <div class="carousel-caption">
+        <h3>Anime</h3>
+        <p>What are you in for? - Everything</p>
+      </div>
+    </div>
+    <div class="carousel-item">
+        <a href="{% url 'rango:show_category' 'documentary' %}"><img src="{% static 'images/documentary.jpg' %}"></a>
+      <div class="carousel-caption">
+        <h3>Documentary</h3>
+        <p>Explore the secrets of nature</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 左右切换按钮 -->
+  <a class="carousel-control-prev" href="#demo" data-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </a>
+  <a class="carousel-control-next" href="#demo" data-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </a>
+
+</div>
+    <div>
     <div class="container">
-        <h1 class="jumbotron-heading">Rango says...</h1>
-        <div>
-            <h2 class="h2">
-            {% if user.is_authenticated %}
-                howdy {{ user.username }}!
-            {% else %}
-                hey there partner!
-            {% endif %}
-            </h2>
-            <strong>{{ boldmessage }}</strong>
-        </div>
+    <div class="row">
+    <div class="ul-box">
+    <h2>Most Liked Categories</h2>
+
+        {% if categories %}
+           {% for category in categories %}
+                        <div class="li-box">
+                            <a href="{% url 'rango:show_category' category.slug %}"><img src="{{ category.thumbnail.url }}"></a>
+                        <span>{{ category.name }}</span>
+                        </div>
+                    {% endfor %}
+        {% else %}
+            <strong>There are no categories present.</strong>
+        {% endif %}
+
+
+
+
+		</div>
     </div>
     </div>
+
 
 {#    <div>#}
 {#        <h2>Most Liked Categories</h2>#}
@@ -37,51 +114,89 @@
 {#        {% else %}#}
 {#        <strong>There are no categories present.</strong>#}
 {#        {% endif %}#}
+{#    <div class="container">#}
+{#    <div class="row">#}
+{#        <div class="col-md-6">#}
+{#            <div class="card mb-6">#}
+{#                <div class="card-body">#}
+{#                    <h2>Most Liked Categories</h2>#}
+{#                    <p class="card-text">#}
+{#                    {% if categories %}#}
+{#                    <div class="list-group">#}
+{#                    {% for category in categories %}#}
+{#                        <li class="list-group-item"><a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a></li>#}
+{#                    {% endfor %}#}
+{#                        <div class="container-fluid">#}
+{#                        <div class="row">#}
+{#                        <div class="imageList">#}
+{#                    {% for category in categories %}#}
+{#                        <div class="col-sm-3"><a href="{% url 'rango:show_category' category.slug %}"><img src="{{ category.thumbnail.url }}" alt="{{ category.slug}}">{{ category.name }}</a></div>#}
+{#                    {% endfor %}#}
+{#                        </div>#}
+{#                        </div>#}
+{#                        </div>#}
+{##}
+{#                    {% else %}#}
+{#                    <strong>There are no categories present.</strong>#}
+{#                    {% endif %}#}
+{#                    </p>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    </div>#}
+
+{#    <div class="container">#}
+{#    <div class="column">#}
+{##}
+{#            <div class="card mb-6">#}
+{#                <div class="card-body">#}
+{#                    <h2>Most Viewed Pages</h2>#}
+{#                    <p class="card-text">#}
+{#                    {% if pages %}#}
+{#                    <ul class="list-group">#}
+{#                    {% for page in pages %}#}
+{#                        <li class="list-group-item"><a href="{{ page.url }}"><img src="{{ page.thumbnail.url }}"></a></li>#}
+{#                    {% endfor %}#}
+{#                    </ul>#}
+{#                    {% else %}#}
+{#                    <strong>There are no pages present.</strong>#}
+{#                    {% endif %}#}
+{#                    </p>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#    </div>#}
+{#    </div>#}
+    </br>
     <div class="container">
     <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-6">
-                <div class="card-body">
-                    <h2>Most Liked Categories</h2>
-                    <p class="card-text">
-                    {% if categories %}
-                    <ul class="list-group">
-                    {% for category in categories %}
-                        <li class="list-group-item"><a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a></li>
+    <div class="ul-box">
+    <h2>Most Liked Pages</h2>
+
+        {% if pages %}
+           {% for page in pages %}
+                        <div class="li-box">
+                            <a href="{{ page.url }}"><img src="{{ page.thumbnail.url }}"></a>
+                        <span>{{ page.title }}</span>
+                        </div>
                     {% endfor %}
-                    </ul>
-                    {% else %}
-                    <strong>There are no categories present.</strong>
-                    {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
+        {% else %}
+            <strong>There are no pages present.</strong>
+        {% endif %}
+
+
+
+
+		</div>
     </div>
     </div>
-    <div class="col-md-6">
-            <div class="card mb-6">
-                <div class="card-body">
-                    <h2>Most Viewed Pages</h2>
-                    <p class="card-text">
-                    {% if pages %}
-                    <ul class="list-group">
-                    {% for page in pages %}
-                        <li class="list-group-item"><a href="{{ page.url }}">{{ page.title }}</a></li class="list-group-item">
-                    {% endfor %}
-                    </ul>
-                    {% else %}
-                    <strong>There are no pages present.</strong>
-                    {% endif %}
-                    </p>
-                </div>
-            </div>
     </div>
 
     
     
 
         <!-- <img src="{% static 'images/rango.jpg' %}" alt="Picture of Rango"/> -->
-        <img src="{% static 'images/rango.jpg' %}" alt="Picture of Rango" />
+{#        <img src="{% static 'images/rango.jpg' %}" alt="Picture of Rango" />#}
 {#    <p>Visits: {{ visits }}</p>#}
 {% endblock %}
