@@ -126,3 +126,52 @@ class RegisterFormClassTests(TestCase):
 
             self.assertTrue(expected_field_name in fields.keys(), f"{FAILURE_HEADER}The field {expected_field_name} was not found in the UserProfile form. Please check it.{FAILURE_FOOTER}")
             self.assertEqual(expected_field, type(fields[expected_field_name]), f"{FAILURE_HEADER}The field {expected_field_name} in UserProfileForm was not of the correct type. Expected {expected_field}; got {type(fields[expected_field_name])}.{FAILURE_FOOTER}")
+
+    def test_userprofile_class(self):
+        """
+        Does the UserProfile class exist in rango.models? If so, are all the required attributes present?
+        Assertion fails if we can't assign values to all the fields required (i.e. one or more missing).
+        """
+        user_profile = UserProfile()
+
+        # Now check that all the required attributes are present.
+        # We do this by building up a UserProfile instance, and saving it.
+        expected_attributes = {
+            'website': 'www.google.com',
+            'picture': tempfile.NamedTemporaryFile(suffix=".jpg").name,
+            'user': create_user_object(),
+        }
+
+        expected_types = {
+            'website': models.fields.URLField,
+            'picture': models.fields.files.ImageField,
+            'user': models.fields.related.OneToOneField,
+        }
+
+        found_count = 0
+
+        for attr in user_profile._meta.fields:
+            attr_name = attr.name
+
+            for expected_attr_name in expected_attributes.keys():
+                if expected_attr_name == attr_name:
+                    found_count += 1
+
+                    self.assertEqual(type(attr), expected_types[attr_name], f"{FAILURE_HEADER}The type of attribute for '{attr_name}' was '{type(attr)}'; we expected '{expected_types[attr_name]}'. Check your definition of the UserProfile model.{FAILURE_FOOTER}")
+                    setattr(user_profile, attr_name, expected_attributes[attr_name])
+
+        self.assertEqual(found_count, len(expected_attributes.keys()), f"{FAILURE_HEADER}In the UserProfile model, we found {found_count} attributes, but were expecting {len(expected_attributes.keys())}. Check your implementation and try again.{FAILURE_FOOTER}")
+        user_profile.save()
+
+
+    def test_model_admin_interface_inclusion(self):
+        """
+        Attempts to access the UserProfile admin interface instance.
+        If we don't get a HTTP 200, then we assume that the model has not been registered. Fair assumption!
+        """
+        super_user = create_super_user_object()
+        self.client.login(username='admin', password='adminpassword')
+
+        # The following URL should be available if the UserProfile model has been registered to the admin interface.
+        response = self.client.get('/admin/rango/userprofile/')
+        self.assertEqual(response.status_code, 200, f"{FAILURE_HEADER}When attempting to access the UserProfile in the admin interface, we didn't get a HTTP 200 status code. Did you register the new model with the admin interface?{FAILURE_FOOTER}")
