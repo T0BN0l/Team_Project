@@ -1,10 +1,11 @@
+# Unit Test for user related function: login, register etc
+# To execute this test: python manage.py test rango.test_user
+
 from django.test import TestCase
 from rango.models import Category, User, UserProfile
 from django.urls import reverse
 
 import os, os.path
-
-# Create your tests here.
 
 FAILURE_HEADER = f"{os.linesep}{os.linesep}{os.linesep}================{os.linesep}TwD TEST FAILURE =({os.linesep}================{os.linesep}"
 FAILURE_FOOTER = f"{os.linesep}"
