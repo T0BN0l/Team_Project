@@ -2,7 +2,11 @@
 # To execute this test: python manage.py test rango.test_user
 
 from django.test import TestCase
+import tempfile
 from rango.models import Category, User, UserProfile
+from rango.forms import UserForm, UserProfileForm
+from django.forms import fields as django_fields
+from django.db import models
 from django.urls import reverse
 
 import os, os.path
@@ -77,3 +81,48 @@ class UserLoginTests(TestCase):
         self.assertFalse('Login' in content, f"{FAILURE_HEADER}After logging a user, Login menu should not be displayed. Check your index.html template.{FAILURE_FOOTER}")
         self.assertTrue('Logout' in content, f"{FAILURE_HEADER}After logging a user, Logout menu should be displayed. Check your index.html template.{FAILURE_FOOTER}")
         self.assertTrue('Profile' in content, f"{FAILURE_HEADER}After logging a user, Profile menu should be displayed. Check your index.html template.{FAILURE_FOOTER}")
+
+# ----------------------------------------------------#
+# Test cases for User Register
+# ----------------------------------------------------#
+class RegisterFormClassTests(TestCase):
+    def test_user_form(self):
+        """
+        Tests whether UserForm has correct fields and the fields have been specified.
+        """
+        user_form = UserForm()
+        self.assertEqual(type(user_form.__dict__['instance']), User, f"{FAILURE_HEADER}UserForm does not match up to the User model. Please check it.{FAILURE_FOOTER}")
+
+        fields = user_form.fields
+
+        expected_fields = {
+            'username': django_fields.CharField,
+            'email': django_fields.EmailField,
+            'password': django_fields.CharField,
+        }
+
+        for expected_field_name in expected_fields:
+            expected_field = expected_fields[expected_field_name]
+
+            self.assertTrue(expected_field_name in fields.keys(), f"{FAILURE_HEADER}The field {expected_field_name} was not found in the UserForm form. Please check it.{FAILURE_FOOTER}")
+            self.assertEqual(expected_field, type(fields[expected_field_name]), f"{FAILURE_HEADER}The field {expected_field_name} in UserForm was not of the correct type. Expected {expected_field}; got {type(fields[expected_field_name])}.{FAILURE_FOOTER}")
+
+    def test_user_profile_form(self):
+        """
+        Tests whether UserProfileForm is created and whether the correct fields have been specified for it.
+        """
+        user_profile_form = UserProfileForm()
+        self.assertEqual(type(user_profile_form.__dict__['instance']), UserProfile, f"{FAILURE_HEADER}UserProfileForm does not match up to the UserProfile model. Please check it.{FAILURE_FOOTER}")
+
+        fields = user_profile_form.fields
+
+        expected_fields = {
+            'website': django_fields.URLField,
+            'picture': django_fields.ImageField,
+        }
+
+        for expected_field_name in expected_fields:
+            expected_field = expected_fields[expected_field_name]
+
+            self.assertTrue(expected_field_name in fields.keys(), f"{FAILURE_HEADER}The field {expected_field_name} was not found in the UserProfile form. Please check it.{FAILURE_FOOTER}")
+            self.assertEqual(expected_field, type(fields[expected_field_name]), f"{FAILURE_HEADER}The field {expected_field_name} in UserProfileForm was not of the correct type. Expected {expected_field}; got {type(fields[expected_field_name])}.{FAILURE_FOOTER}")
