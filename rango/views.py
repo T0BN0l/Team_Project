@@ -3,13 +3,16 @@ from datetime import datetime
 from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.utils.decorators import method_decorator
+from django.views import View
 
 from rango.admin import CategoryAdmin
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import render
 
 from rango.bing_search import run_query
-from rango.models import Category, UserView, UserLike
+from rango.models import Category, UserView, UserLike, UserProfile
 from rango.models import Page
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 from django.shortcuts import redirect
@@ -65,7 +68,7 @@ def about(request):
     print(request.method)
     print(request.user)
     visitor_cookie_handler(request)
-    return render(request, 'rango/about.html', {'visits':request.session['visits']})
+    return render(request, 'rango/about.html', {'visits': request.session['visits']})
 
 
 def show_category(request, category_name_slug):
@@ -77,13 +80,24 @@ def show_category(request, category_name_slug):
         category = Category.objects.get(slug=category_name_slug)
 
         pages = Page.objects.filter(category=category)
+        # Check whether user already liked this category or not
+        # category_liked = False
+        if request.user.is_authenticated:
+            # user_id = request.user.id
+            # category_id = category.id
+            # category_liked = UserLike.objects.filter(user_id=user_id, category_id=category_id).exists()
+            category_liked = is_user_liked_category(request.user.id, category.id)
+        else:
+            category_liked = False
 
         context_dict['pages'] = pages
         context_dict['category'] = category
+        context_dict['category_liked'] = category_liked
 
     except Category.DoesNotExist:
         context_dict['pages'] = None
         context_dict['category'] = None
+        context_dict['category_liked'] = False
 
     return render(request, 'rango/category.html', context_dict)
 
@@ -135,21 +149,150 @@ def add_page(request, category_name_slug):
 
 
 @login_required
-def restricted(request):
-    return render(request, 'rango/restricted.html')
+def register_profile(request):
+    form = UserProfileForm()
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            user_profile = form.save(commit=False)
+            user_profile.user = request.user
+            user_profile.save()
+            return redirect(reverse('rango:index'))
+        else:
+            print(form.errors)
+
+    context_dict = {'form': form}
+    return render(request, 'rango/profile_registration.html', context_dict)
 
 
-@login_required
-def show_user_likes(request, username):
-    context_dict = {}
-    try:
-        user_likes = UserLike.objects.filter(username=username)
+class AboutView(View):
+    def get(self, request):
+        context_dict = {}
 
-        context_dict['likes'] = user_likes
+        visitor_cookie_handler(request)
+        context_dict['visits'] = request.session['visits']
+        return render(request, 'rango/about.html', context_dict)
 
-    except Category.DoesNotExist:
-        context_dict['likes'] = None
-    return render(request, 'rango/user_likes.html', context=context_dict)
+
+class AddCategoryView(View):
+    @method_decorator(login_required())
+    def get(self, request):
+        form = CategoryForm()
+        return render(request, 'rango/add_category.html', {'form': form})
+
+    @method_decorator(login_required())
+    def post(self, request):
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return redirect(reverse('rango:index'))
+        else:
+            print(form.errors)
+        return render(request, 'rango/add_category.html', {'form': form})
+
+
+class ProfileView(View):
+    # @login_required
+    # def get_like(self, request):
+    #     user_id = request.user.id
+    #     # get most recent 5 like categories (since the id is auto increment, the biggest one is added most recently)
+    #     ulikes = UserLike.objects.filter(user_id=user_id).order_by('-id')[:5]
+    #
+    #     category_list = [x.category for x in ulikes]
+    #     context_dict = {}
+    #
+    #     context_dict['categories'] = category_list
+    #     # return render(request, 'rango/profile.html', context=context_dict)
+    #     return context_dict
+
+    def get_user_details(self, username):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return None
+        user_profile = UserProfile.objects.get_or_create(user=user)[0]
+        form = UserProfileForm({'website': user_profile.website,
+                                'picture': user_profile.picture})
+        return user, user_profile, form
+
+    @method_decorator(login_required)
+    def get(self, request, username):
+
+        try:
+            # context_dict = self.get_like(request)
+            (user, user_profile, form) = self.get_user_details(username)
+        except TypeError:
+            return redirect(reverse('rango:index'))
+        # context_dict['user_profile'] = user_profile
+        # context_dict['selected_user'] = user
+        # context_dict['form'] = form
+
+        user_id = request.user.id
+        # get most recent 5 like categories (since the id is auto increment, the biggest one is added most recently)
+        ulikes = UserLike.objects.filter(user_id=user_id).order_by('-id')[:5]
+
+        category_list = [x.category for x in ulikes]
+
+        context_dict = {'categories': category_list,
+                        'user_profile': user_profile,
+                        'selected_user': user,
+                        'form': form}
+        return render(request, 'rango/profile.html', context_dict)
+
+    @method_decorator(login_required)
+    def post(self, request, username):
+        try:
+            (user, user_profile, form) = self.get_user_details(username)
+        except TypeError:
+            return redirect(reverse('rango:index'))
+        form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
+        if form.is_valid():
+            form.save(commit=True)
+            return redirect('rango:profile', user.username)
+        else:
+            print(form.errors)
+
+        context_dict = {'user_profile': user_profile,
+                        'selected_user': user,
+                        'form': form}
+        return render(request, 'rango/profile.html', context_dict)
+
+
+# @login_required
+# def register_profile(request):
+#     form = UserProfileForm()
+#     if request.method == 'POST':
+#         form = UserProfileForm(request.POST, request.FILES)
+#
+#         if form.is_valid():
+#             user_profile = form.save(commit=False)
+#             user_profile.user = request.user
+#             user_profile.save()
+#             return redirect(reverse('rango:index'))
+#         else:
+#             print(form.errors)
+#
+#     context_dict = {'form': form}
+#     return render(request, 'rango/profile_registration.html', context_dict)
+
+
+# @login_required
+# def restricted(request):
+#     return render(request, 'rango/restricted.html')
+
+
+# @login_required
+# def show_user_likes(request, username):
+#     context_dict = {}
+#     try:
+#         user_likes = UserLike.objects.filter(username=username)
+#
+#         context_dict['likes'] = user_likes
+#
+#     except Category.DoesNotExist:
+#         context_dict['likes'] = None
+#     return render(request, 'rango/user_likes.html', context=context_dict)
 
 
 @login_required
@@ -189,7 +332,57 @@ def get_server_side_cookie(request, cookie, default_val=None):
         val = default_val
     return val
 
-# def about(request):
+
+# like category view
+class LikeCategoryView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        category_id = request.GET['category_id']
+        user_id = request.user.id
+        category_liked = is_user_liked_category(user_id, category_id)
+
+        try:
+            category = Category.objects.get(id=int(category_id))
+            check = str(user_id) + '_' + str(category_id)
+            ulike = UserLike.objects.get_or_create(user_id=user_id, category_id=category_id, check=check)[0]
+            ulike.save()
+        except Category.DoesNotExist:
+            return HttpResponse(-1)
+        except ValueError:
+            return HttpResponse(-1)
+
+        # category.likes = category.likes + 1
+        # category.save()
+        # Only increment the like in category table if the category is firstly liked by the login user
+        if not category_liked:
+            category.likes = category.likes + 1
+            category.save()
+
+        return HttpResponse(category.likes)
+
+
+# @login_required
+# def profile(request):
+#     user_id = request.user.id
+#     # get most recent 5 like categories (since the id is auto increment, the biggest one is added most recently)
+#     ulikes = UserLike.objects.filter(user_id=user_id).order_by('-id')[:5]
+#
+#     category_list = [x.category for x in ulikes]
+#     context_dict = {}
+#
+#     context_dict['categories'] = category_list
+#     # return render(request, 'rango/profile.html', context=context_dict)
+#     return render(request, 'rango/profile.html', context=context_dict)
+
+# Check whether the user liked the category or not
+
+
+def is_user_liked_category(user_id, category_id):
+    return UserLike.objects.filter(user_id=user_id, category_id=category_id).exists()
+
+    # def about(request):
+
+
 #     # cookie test
 #     if request.session.test_cookie_worked():
 #         print("TEST COOKIE WORKED!")
@@ -385,11 +578,53 @@ def get_server_side_cookie(request, cookie, default_val=None):
 def search(request):
     result_list = []
     query = ''
-
+    context_dict = {}
     if request.method == 'POST':
-        query = request.POST['query'].strip()
+        if request.method == 'POST':
+            query = request.POST['query'].strip()
 
-        if query:
-            result_list = run_query(query)
+            if query:
+                context_dict['result_list'] = run_query(query)
+                context_dict['query'] = query
 
-    return render(request, 'rango/search.html', {'result_list': result_list, query: 'query'})
+    return render(request, 'rango/search.html', context_dict)
+
+
+def get_category_list(max_results=0, starts_with=''):
+    category_list = []
+
+    if starts_with:
+        category_list = Category.objects.filter(name__istartswith=starts_with)
+
+    if max_results > 0:
+        if len(category_list) > max_results:
+            category_list = category_list[:max_results]
+
+    return category_list
+
+
+def suggest_category(request):
+    category_list = []
+    start_with = ''
+    if request.method == 'GET':
+        start_with = request.GET['suggestion']
+    category_list = get_category_list(8, start_with)
+    if len(category_list) == 0:
+        category_list = Category.objects.order_by('-likes')
+    return render(request, 'rango/categories.html', {'categories': category_list})
+
+
+
+# class CategorySuggestionView(View):
+#     def get(self, request):
+#         if 'suggestion' in request.GET:
+#             suggestion = request.GET['suggestion']
+#         else:
+#             suggestion = ''
+#
+#         category_list = get_category_list(max_results=5, starts_with=suggestion)
+#
+#         if len(category_list) == 0:
+#             category_list = Category.objects.order_by('-likes')
+#
+#         return render(request, 'rango/categories.html', {'categories': category_list})

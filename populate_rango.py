@@ -24,7 +24,7 @@ def populate():
          'description': 'Natasha Romanoff confronts the darker parts of her ledger when a dangerous conspiracy with ties to her past arises.',
          'thumbnail': 'page_images/blackwidow.png'},
         {'title': 'Mission: Impossible - Fallout',
-         'url': 'http://www.korokithakis.net/tutorials/python/',
+         'url': 'https://www.imdb.com/title/tt4912910/?ref_=nv_sr_srsg_4',
          'views': 280,
          'description': "Ethan Hunt and his IMF team, along with some familiar allies, race against time after a mission gone wrong",
          'thumbnail': 'page_images/missionimpossible.png'}
